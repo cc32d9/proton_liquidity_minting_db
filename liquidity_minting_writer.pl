@@ -29,8 +29,8 @@ sub liquidity_minting_prepare
         $dbh->prepare('DELETE FROM CURRENT_REWARDS WHERE account=? AND currency=? AND precision=?');
 
     $main::db->{'rewards_history_ins'} =
-        $dbh->prepare('INSERT INTO REWARDS_HISTORY (block_num, block_time, account, currency, precision, reward_snapshot) ' .
-                      'VALUES (?,?,?,?,?,?)');
+        $dbh->prepare('INSERT INTO REWARDS_HISTORY (block_num, account, currency, precision, reward_snapshot) ' .
+                      'VALUES (?,?,?,?,?)');
 
     $main::db->{'rewards_history_del'} =
         $dbh->prepare('DELETE FROM REWARDS_HISTORY WHERE block_num=? AND account=? AND currency=? AND precision=?');
