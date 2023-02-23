@@ -10,7 +10,7 @@ my $minting_contract;
 sub liquidity_minting_prepare
 {
     my $args = shift;
-    
+
     if( not defined($args->{'minting_contract'}) )
     {
         print STDERR "Error: liquidity_minting_writer.pl requires --parg minting_contract=XXX\n";
@@ -29,12 +29,12 @@ sub liquidity_minting_prepare
         $dbh->prepare('DELETE FROM CURRENT_REWARDS WHERE account=? AND currency=? AND precision=?');
 
     $main::db->{'rewards_history_ins'} =
-        $dbh->prepare('INSERT INTO REWARDS_HISTORY (block_num, account, currency, precision, reward_snapshot) ' .
-                      'VALUES (?,?,?,?,?)');
+        $dbh->prepare('INSERT INTO REWARDS_HISTORY (block_num, block_time, account, currency, precision, reward_snapshot) ' .
+                      'VALUES (?,?,?,?,?,?)');
 
     $main::db->{'rewards_history_del'} =
         $dbh->prepare('DELETE FROM REWARDS_HISTORY WHERE block_num=? AND account=? AND currency=? AND precision=?');
-    
+
     printf STDERR ("liquidity_minting_writer.pl prepared\n");
 }
 
@@ -57,6 +57,7 @@ sub liquidity_minting_row
     my $added = shift;
     my $kvo = shift;
     my $block_num = shift;
+    my $block_time = shift;
 
     if( $kvo->{'code'} eq $minting_contract )
     {
@@ -67,12 +68,12 @@ sub liquidity_minting_row
             foreach my $entry (@{$kvo->{'value'}{'stakes'}})
             {
                 my($precision, $symbol) = split(/,/, $entry->{'key'}{'sym'});
-                                                               
+
                 if( $added )
                 {
                     my $reward_snapshot = $json->encode($entry->{'value'});
                     $main::db->{'current_rewards_ins'}->execute($account, $symbol, $precision, $reward_snapshot);
-                    $main::db->{'rewards_history_ins'}->execute($block_num, $account, $symbol, $precision, $reward_snapshot);
+                    $main::db->{'rewards_history_ins'}->execute($block_num, $block_time, $account, $symbol, $precision, $reward_snapshot);
                 }
                 else
                 {
